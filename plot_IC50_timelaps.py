@@ -112,8 +112,8 @@ C = [0.01, 0.1, 0.2, 0.5, 2, 5, 10]
 
 ### plot ###############################################################################################################
 fontsize = 12
-markersize = 6
-alpha = 0.35
+markersize = 8
+alpha = 0.5
 alpha_data = 1
 labels = [r"(A) 17 h post-infection",
           r"(B) 25 h post-infection",
@@ -154,10 +154,9 @@ for ii in range(2):
                 solution_6well_t_out = load(a)
 
             solution_6well_t = np.asarray(solution_6well_t_out)
+
             solutions_6well_min = np.percentile(solution_6well_t[:,kk], 2.5)
             solutions_6well_max = np.percentile(solution_6well_t[:,kk], 97.5)
-            # solutions_6well_min = np.min(solution_6well_t[:,kk])
-            # solutions_6well_max = np.max(solution_6well_t[:,kk])
 
             solution_6well_t_min.append(solutions_6well_min)
             solution_6well_t_max.append(solutions_6well_max)
@@ -168,52 +167,34 @@ for ii in range(2):
         opt_parameters = least_squares(residuals_virus, guess, args=(cc, maxlik_solutions_6well_t))
         IC50_parameters = opt_parameters.x
 
-        # axs[ii,jj].fill_between(np.log10(cc), solution_6well_t_min, solution_6well_t_max, facecolor="grey",
-        #                                                                                     edgecolor="grey",
-        #                                                                                     alpha=alpha)
+        axs[ii,jj].fill_between(np.log10(cc), solution_6well_t_min, solution_6well_t_max, facecolor="lightgreen",
+                                                                                          alpha=alpha)
 
         axs[ii, jj].plot(np.log10(cc), maxlik_solutions_6well_t,
-                         color="green",
+                         color="black",
                          linestyle="-",
                          linewidth=1,
                          alpha=1)
-        axs[ii, jj].plot(np.log10(cc), solution_6well_t_min,
-                         color="green",
-                         linestyle="--",
-                         linewidth=1,
-                         alpha=0.5)
-        axs[ii, jj].plot(np.log10(cc), solution_6well_t_max,
-                         color="green",
-                         linestyle="--",
-                         linewidth=1,
-                         alpha=0.5)
+        axs[ii, jj].plot(np.log10(IC50_parameters[2]) * np.ones(10), np.linspace(3.3, virus(IC50_parameters[2], IC50_parameters),10),
+                    color="gray",
+                    linestyle=":")
+        axs[ii, jj].plot(np.linspace(-2.1, np.log10(IC50_parameters[2]), 10), np.ones(10) * virus(IC50_parameters[2], IC50_parameters),
+                    color="gray",
+                    linestyle=":")
         axs[ii, jj].plot(np.log10(IC50_parameters[2]), virus(IC50_parameters[2], IC50_parameters),
                          marker="o",
                          markersize=markersize,
+                         markeredgewidth=0.5,
                          markeredgecolor="black",
-                         markerfacecolor="green",
-                         alpha=1)
-        axs[ii, jj].plot(np.log10(IC50_parameters[2]) * np.ones(10), np.linspace(3.3, virus(IC50_parameters[2], IC50_parameters),10),
-                    color="black",
-                    linestyle=":",
-                    alpha=0.5)
-        axs[ii, jj].plot(np.linspace(-2.1, np.log10(IC50_parameters[2]), 10), np.ones(10) * virus(IC50_parameters[2], IC50_parameters),
-                    color="black",
-                    linestyle=":",
-                    alpha=0.5)
-        # axs[ii, jj].plot(np.log10(cc), virus(cc, IC50_parameters),
-        #                  color="red",
-        #                  linestyle="-",
-        #                  linewidth=1,
-        #                  alpha=alpha)
+                         markerfacecolor="lightgreen",
+                         alpha=alpha_data)
         axs[ii, jj].text(-0.4, 3.5, "IC$_{50}$ = " + str(round(IC50_parameters[2], 3)) + r" \textmu M",
                          fontsize=fontsize,
-                         color="green")
+                         color="black")
 
         print("Time t = " + str(tt_points[kk]) + " h done.")
 
 fig.tight_layout()
-plt.savefig("../LaTeX/figures/inhibition_IC50_timelaps.pdf",
-            format="pdf", transparent=True)
-plt.savefig("./figures/inhibition_IC50_timelaps.tiff", format="tiff")
+plt.savefig("./figures/Fig7.pdf", format="pdf", transparent=True)
+plt.savefig("./figures/Fig7.tiff", format="tiff")
 plt.show()

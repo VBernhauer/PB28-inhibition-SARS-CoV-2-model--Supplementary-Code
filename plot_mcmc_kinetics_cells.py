@@ -1,8 +1,6 @@
 #! /usr/bin/env python
 from __future__ import division
 from pickle import load
-
-
 from scipy.integrate import odeint
 
 import matplotlib.patches as mpatches
@@ -10,9 +8,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import os
-# import matplotlib
-# matplotlib.rcParams['text.usetex'] = True
-# matplotlib.rcParams['font.family'] = 'Helvetica'
 
 from matplotlib import rc
 rc('font',**{'family':'serif','serif':['Times']})
@@ -149,7 +144,6 @@ maxlik_solution_96well = model_96well_tt(chains[idx_max_likelihood,:])
 solutions_6well = []
 solutions_96well = []
 for i in range(int(np.size(chains)/dim)):
-    # if i % 5 == 0:
     solutions_6well.append(model_6well_tt(chains[i,:]))
     solutions_96well.append(model_96well_tt(chains[i,:]))
 solutions_6well = np.array(solutions_6well)
@@ -184,11 +178,9 @@ for c_idx, infection in enumerate(solutions_6well_out):
         solution_min_6well_t = []
         solution_max_6well_t = []
         for idx, t in enumerate(tt):
-            # solution_min_6well_t_p = np.min(solution_6well_infection[:,p,idx])
             solution_min_6well_t_p = np.percentile(solution_6well_infection[:, p, idx], 2.5)
             solution_min_6well_t.append(solution_min_6well_t_p)
 
-            # solution_max_6well_t_p = np.max(solution_6well_infection[:, p, idx])
             solution_max_6well_t_p = np.percentile(solution_6well_infection[:, p, idx], 97.5)
             solution_max_6well_t.append(solution_max_6well_t_p)
 
@@ -206,11 +198,9 @@ for c_idx, infection in enumerate(solutions_96well_out):
         solution_min_96well_t = []
         solution_max_96well_t = []
         for idx, t in enumerate(tt):
-            # solution_min_96well_t_p = np.min(solution_96well_infection[:,p,idx])
             solution_min_96well_t_p = np.percentile(solution_96well_infection[:, p, idx], 2.5)
             solution_min_96well_t.append(solution_min_96well_t_p)
 
-            # solution_max_96well_t_p = np.max(solution_96well_infection[:, p, idx])
             solution_max_96well_t_p = np.percentile(solution_96well_infection[:, p, idx], 97.5)
             solution_max_96well_t.append(solution_max_96well_t_p)
 
@@ -252,7 +242,6 @@ for ii in range(3):
         axs[ii, jj].xaxis.set_ticks(np.append([0], t_file_virus))
         axs[ii, jj].xaxis.set_ticklabels(np.append([0], t_file_virus), fontsize=fontsize)
         axs[ii, jj].set_xlim(-3.0, 100.0)
-        # if kk <= 5:
         axs[ii, jj].yaxis.set_ticks([0, 0.2, 0.4, 0.6, 0.8, 1])
         axs[ii, jj].yaxis.set_ticklabels([0, 0.2, 0.4, 0.6, 0.8, 1], fontsize=fontsize)
         axs[ii, jj].set_ylim(-0.1, 1.15)
@@ -265,62 +254,33 @@ for ii in range(3):
 
         if kk <= 5:
             for nn in range(3):
-                # axs[ii, jj].fill_between(tt, solution_min_96well[kk][nn], solution_max_96well[kk][nn], facecolor=colors[nn],
-                #                                                                                  edgecolor=colors[nn],
-                #                                                                                  alpha=alpha)
+                axs[ii, jj].fill_between(tt, solution_min_96well[kk][nn], solution_max_96well[kk][nn], facecolor=colors[nn],
+                                                                                                       alpha=alpha)
                 axs[ii,jj].plot(tt, maxlik_solution_96well[kk][nn],
                          color=colors[nn],
                          linestyle="-",
                          linewidth=1,
                          alpha=1)
-                axs[ii,jj].plot(tt, solution_min_96well[kk][nn],
-                         color=colors[nn],
-                         linestyle="--",
-                         linewidth=1,
-                         alpha=0.5)
-                axs[ii,jj].plot(tt, solution_max_96well[kk][nn],
-                         color=colors[nn],
-                         linestyle="--",
-                         linewidth=1,
-                         alpha=0.5)
         if kk > 5:
             mm = kk - 6
             for nn in range(3):
-                # axs[ii,jj].fill_between(tt, solution_min_6well[mm][nn], solution_max_6well[mm][nn], facecolor=colors[nn],
-                #                                                                             edgecolor=colors[nn],
-                #                                                                             alpha=alpha,
-                #                                                                             label=population[nn])
+                axs[ii,jj].fill_between(tt, solution_min_6well[mm][nn], solution_max_6well[mm][nn], facecolor=colors[nn],
+                                                                                                    alpha=alpha)
                 axs[ii,jj].plot(tt, maxlik_solution_6well[mm][nn],
                          color=colors[nn],
                          linestyle="-",
                          linewidth=1,
                          alpha=1)
-                axs[ii,jj].plot(tt, solution_min_6well[mm][nn],
-                         color=colors[nn],
-                         linestyle="--",
-                         linewidth=1,
-                         alpha=0.5)
-                axs[ii,jj].plot(tt, solution_max_6well[mm][nn],
-                         color=colors[nn],
-                         linestyle="--",
-                         linewidth=1,
-                         alpha=0.5)
 
 mp = [[], [], []]
 for ii in range(len(population)):
     mp[ii] = mpatches.Patch(color=colors[ii], alpha=alpha, linewidth=0)
-# handles, labels = axs[0, 1].get_legend_handles_labels()
 for ii in range(3):
     for jj in range(3):
         axs[ii, jj].legend(mp, population, loc='center left',
                            fontsize=8)
-# axs[0, 1].legend(mp, population, ncol=len(population),
-#                                  columnspacing=0.5,
-#                                  loc='upper center',
-#                                  bbox_to_anchor=(0.4, 1.25))
 
 fig.tight_layout()
-plt.savefig("../LaTeX/figures/kinetics_cells.pdf",
-            format="pdf", transparent=True)
-plt.savefig("./figures/kinetics_cells.tiff", format="tiff")
+plt.savefig("./figures/Fig4.pdf", format="pdf", transparent=True)
+plt.savefig("./figures/Fig4.tiff", format="tiff")
 plt.show()

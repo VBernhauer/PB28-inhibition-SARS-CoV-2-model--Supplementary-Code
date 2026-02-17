@@ -12,7 +12,6 @@ import seaborn as sns
 import os
 import emcee
 
-from mcmc import IC50_lower, parameters_init
 
 chains = "./chains_IC50"
 if not os.path.exists(chains):
@@ -70,48 +69,48 @@ def residuals_virus(parameters, c, data):
     return res
 
 
-V0_min_lower  = 0
-V0_min_upper  = np.inf
-V0_max_lower  = 0
-V0_max_upper  = np.inf
-IC_50_lower   = 0
-IC_50_upper   = np.inf
-N_lower       = 0
-N_upper       = np.inf
-
-bound_lower = [V0_min_lower,
-               V0_max_lower,
-               IC_50_lower,
-               N_lower]
-bound_upper = [V0_min_upper,
-               V0_max_upper,
-               IC_50_upper,
-               N_upper]
-
-V0_min      = np.log10(1e+4)
-V0_max      = np.log10(1e+6)
-IC_50       = np.log10(1e-1)
-N           = np.log10(1e+0)
-
-parameters = V0_min, V0_max, IC_50, N
-
-#### MCMC #############################################################################################################
-pos = 10 ** (parameters + 1e-4 * np.random.randn(2 * len(parameters), len(parameters)))
-nwalkers, ndim = np.shape(pos)
-
-sampler = emcee.EnsembleSampler(nwalkers, ndim, logprob)
-Nsamples = 20000  # number of final posterior samples
-
-print("MCMC...")
-sampler.run_mcmc(pos, Nsamples, progress=True)
-
-chains = sampler.get_chain(discard=int(Nsamples/2), thin=5, flat=True)
-log_prob = sampler.get_log_prob(discard=int(Nsamples/2), thin=5, flat=True)
-
-with open('chains_IC50/logprob.obj', 'wb') as a:
-    dump(log_prob, a)
-with open('chains_IC50/chains.obj', 'wb') as a:
-    dump(chains, a)
+# V0_min_lower  = 0
+# V0_min_upper  = np.inf
+# V0_max_lower  = 0
+# V0_max_upper  = np.inf
+# IC_50_lower   = 0
+# IC_50_upper   = np.inf
+# N_lower       = 0
+# N_upper       = np.inf
+#
+# bound_lower = [V0_min_lower,
+#                V0_max_lower,
+#                IC_50_lower,
+#                N_lower]
+# bound_upper = [V0_min_upper,
+#                V0_max_upper,
+#                IC_50_upper,
+#                N_upper]
+#
+# V0_min      = np.log10(1e+4)
+# V0_max      = np.log10(1e+6)
+# IC_50       = np.log10(1e-1)
+# N           = np.log10(1e+0)
+#
+# parameters = V0_min, V0_max, IC_50, N
+#
+# #### MCMC #############################################################################################################
+# pos = 10 ** (parameters + 1e-4 * np.random.randn(2 * len(parameters), len(parameters)))
+# nwalkers, ndim = np.shape(pos)
+#
+# sampler = emcee.EnsembleSampler(nwalkers, ndim, logprob)
+# Nsamples = 20000  # number of final posterior samples
+#
+# print("MCMC...")
+# sampler.run_mcmc(pos, Nsamples, progress=True)
+#
+# chains = sampler.get_chain(discard=int(Nsamples/2), thin=5, flat=True)
+# log_prob = sampler.get_log_prob(discard=int(Nsamples/2), thin=5, flat=True)
+#
+# with open('chains_IC50/logprob.obj', 'wb') as a:
+#     dump(log_prob, a)
+# with open('chains_IC50/chains.obj', 'wb') as a:
+#     dump(chains, a)
 
 ########################################################################################################################
 with open('chains_IC50/chains.obj', 'rb') as a:
@@ -120,8 +119,8 @@ with open('chains_IC50/chains.obj', 'rb') as a:
 with open('chains_IC50/logprob.obj', 'rb') as b:
     log_prob = load(b)
 
-labels = (r"log$_{10}$ $\mathrm{V}_\mathrm{{0,min}}$", r"log$_{10}$ $\mathrm{V}_\mathrm{{0,max}}$",
-          r"log$_{10}$ $\mathrm{IC}_{50,\epsilon}$", r"log$_{10}$ $N_{\epsilon}$")
+labels = (r"log$_{10}$ ${V}_\mathrm{{0,min}}$", r"log$_{10}$ ${V}_\mathrm{{0,max}}$",
+          r"log$_{10}$ ${IC}_{50}$", r"log$_{10}$ $N$")
 ndim = len(labels)
 
 cc = np.concatenate([np.linspace(0.01, 0.99, 99), np.linspace(1, 10, 91)])
@@ -130,9 +129,6 @@ cc = np.concatenate([np.linspace(0.01, 0.99, 99), np.linspace(1, 10, 91)])
 idx_max_likelihood = np.argmax(log_prob)
 maxlik_parameters = chains[idx_max_likelihood,:]
 maxlik_solution = virus(chains[idx_max_likelihood,:], cc)
-
-# for i in range(len(cc)):
-#     print([10**maxlik_solution[i],cc[i]])
 
 ### get the bounds on the solutions ####################################################################################
 solution = []
@@ -147,11 +143,6 @@ for idx, concentration in enumerate(cc):
     solution_min.append(solution_min_idx)
     solution_max_idx = np.percentile(solution[:,idx], 97.5)
     solution_max.append(solution_max_idx)
-
-    # solution_min_idx = np.min(solution[:,idx])
-    # solution_min.append(solution_min_idx)
-    # solution_max_idx = np.max(solution[:,idx])
-    # solution_max.append(solution_max_idx)
 
 ### fit Hill to viral loads
 guess = np.array([10 ** maxlik_solution[-1], 10 ** maxlik_solution[0], 0.5, 2])
@@ -188,10 +179,10 @@ fig = plt.figure(figsize=(5, 4))
 
 markersize = 8
 capsize = 8
-alpha = 0.35
+alpha = 0.5
 alpha_data = 1
-linewidth = 1.5
-elinewidth = 1.5
+linewidth = 1
+elinewidth = 1
 fontsize = 12
 
 plt.subplot(1, 1, 1)
@@ -203,44 +194,34 @@ frame.axes.yaxis.set_ticks([3.5, 4, 4.5, 5, 5.5, 6, 6.5])
 frame.axes.yaxis.set_ticklabels(["3.5", "4", "4.5", "5", "5.5", "6", "6.5"], fontsize=fontsize)
 plt.ylim(3.3, 6.7)
 plt.xlabel(r"PB28 concentration (\textmu M)", fontsize=fontsize)
-plt.ylabel(r"Viral load (log$_{10}$ PFU$_\mathrm{e}$/mL", fontsize=fontsize)
-# plt.fill_between(np.log10(cc), solution_min, solution_max, facecolor="grey", edgecolor="grey", alpha=0.3)
-plt.plot(np.log10(cc), maxlik_solution, color="green",
-                                                 linestyle="-",
-                                                 linewidth=1,
-                                                 alpha=1)
-plt.plot(np.log10(cc), solution_min, color="green",
-                                                 linestyle="--",
-                                                 linewidth=1,
-                                                 alpha=0.5)
-plt.plot(np.log10(cc), solution_max, color="green",
-                                                 linestyle="--",
-                                                 linewidth=1,
-                                                 alpha=0.5)
+plt.ylabel(r"Viral load (log$_{10}$ PFU$_\mathrm{e}$/mL)", fontsize=fontsize)
+plt.fill_between(np.log10(cc), solution_min, solution_max, facecolor="lightgreen", alpha=alpha)
+plt.plot(np.log10(cc), maxlik_solution, color="black",
+                                             linestyle="-",
+                                             linewidth=linewidth,
+                                             alpha=1)
 plt.plot(np.log10(IC50_parameters[2]) * np.ones(10),
                  np.linspace(3.3, virus(IC50_parameters, IC50_parameters[2]), 10),
-                 color="black",
-                 linestyle=":",
-                 alpha=0.5)
+                 color="gray",
+                 linestyle=":")
 plt.plot(np.linspace(-2.1, np.log10(IC50_parameters[2]), 10),
                  np.ones(10) * virus(IC50_parameters, IC50_parameters[2]),
-                 color="black",
-                 linestyle=":",
-                 alpha=0.5)
+                 color="gray",
+                 linestyle=":")
 for line in data:
     plt.plot(np.log10(C), line, marker="o",
-                                        color="green",
-                                        markeredgecolor="black",
-                                        linestyle=" ",
                                         markersize=markersize,
+                                        markeredgecolor="black",
+                                        markeredgewidth=0.5,
+                                        linestyle=" ",
+                                        color="lightgreen",
                                         alpha=alpha_data)
 plt.text(-2, 3.5, "IC$_{50}$ = " + str(round(maxlik_parameters[2], 3)) + r" \textmu M",
                fontsize=fontsize,
-               color='green')#,
+               color='black')#,
                # weight='bold')
 fig.tight_layout()
-plt.savefig("../LaTeX/figures/inhibition.pdf",
-            format="pdf", transparent=True)
+plt.savefig("./figures/inhibition.pdf", format="pdf", transparent=True)
 plt.savefig("./figures/inhibition.tiff", format="tiff")
 
 
@@ -269,13 +250,8 @@ for i in range(ndim):
         elif i == j:
             sns.kdeplot(data=np.log10(chains[:, i]),
                         ax=axs[i, j],
-                        color="green",
+                        color="gray",
                         fill=True)
-            # axs[i, j].hist(np.log10(chains[:, i]),
-            #                bins=n_bins,
-            #                color=(0, 0, 0, 0.1),
-            #                linewidth=0.5,
-            #                edgecolor="green")
             if i < ndim-1:
                 axs[i, j].set_xticks([])
                 axs[i, j].set_xlabel('')
@@ -284,27 +260,30 @@ for i in range(ndim):
             axs[i, j].set_ylabel('')
             axs[i, j].set_yticklabels([])
         else:
-            corrplt = sns.kdeplot(data=df, x=df[j], y=df[i], ax=axs[i, j], color="green", linewidths=0.5)
+            corrplt = sns.kdeplot(data=df, x=df[j], y=df[i], ax=axs[i, j], color="gray", linewidths=0.5)
             if i != ndim - 1:
                 corrplt.set(ylabel=None)
             if i != ndim - 1:
                 corrplt.set(xlabel=None)
             if j  != 0:
                 corrplt.set(ylabel=None)
-            axs[i, j].scatter(np.log10(maxlik_parameters[j]), np.log10(maxlik_parameters[i]),
-                              s=24,
-                              color="black",
-                              alpha=1)
             axs[i, j].axvline(x = np.log10(maxlik_parameters[j]),
-                              color="black",
+                              color="green",
                               linestyle='-',
                               linewidth=0.5,
                               alpha=1)
             axs[i, j].axhline(y = np.log10(maxlik_parameters[i]),
-                              color="black",
+                              color="green",
                               linestyle='-',
                               linewidth=0.5,
                               alpha=1)
+            axs[i, j].scatter(np.log10(maxlik_parameters[j]), np.log10(maxlik_parameters[i]),
+                              s=32,
+                              color="green",
+                              alpha=1,
+                              edgecolor="green",
+                              linewidths=0.5,
+                              )
             correl, _ = pearsonr(np.log10(chains[:,j]), np.log10(chains[:,i]))
             axs[i,j].text(0.7, 0.8, round(correl, 2),
                           fontsize=MEDIUM_SIZE,
@@ -326,7 +305,6 @@ for i in range(ndim):
             axs[i, 0].set_ylabel(labels[i], rotation=90, labelpad=5)
 
 plt.tight_layout()
-plt.savefig("../LaTeX/figures/inhibition_corner.pdf",
-            format="pdf", transparent=True)
-plt.savefig("./figures/inhibition_corner.tiff", format="tiff")
+plt.savefig("./figures/FigS11.pdf", format="pdf", transparent=True)
+plt.savefig("./figures/FigS11.tiff", format="tiff")
 plt.show()

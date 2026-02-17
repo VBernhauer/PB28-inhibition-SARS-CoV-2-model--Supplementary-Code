@@ -39,11 +39,11 @@ data_file_virus_5 = file_virus_5.values.T[1:7]
 
 ### plot ###
 fontsize = 12
-markersize = 6
+markersize = 8
 alpha = 1
 
-colors = ["blueviolet",
-          "blue",
+colors = ["orchid",
+          "dodgerblue",
           "cyan"]
 
 fig, axs = plt.subplots(1, 2, figsize=(8, 3.2))
@@ -61,11 +61,12 @@ axs[0].text(-2.0, 6.2, "(A) end-point infection",
                color='black')
 for line_c_file_inhibition in data_file_inhibition:
     axs[0].plot(np.log10(c_file_inhibition), np.log10(line_c_file_inhibition), marker="o",
-                                                                                  color="green",
-                                                                                  markeredgecolor="black",
-                                                                                  linestyle=" ",
-                                                                                  markersize=markersize,
-                                                                                  alpha=alpha)
+                                                                                markersize=markersize,
+                                                                                markeredgecolor="black",
+                                                                                markeredgewidth=0.5,
+                                                                                linestyle=" ",
+                                                                                color="lightgreen",
+                                                                                alpha=alpha)
 
 axs[1].xaxis.set_ticks(t_file_virus)
 axs[1].xaxis.set_ticklabels(t_file_virus,fontsize=fontsize)
@@ -80,53 +81,58 @@ axs[1].text(17, 6.6, "(B) time-resolved infection",
                color='black')
 for line_data_file_virus_0 in data_file_virus_0:
     axs[1].plot(t_file_virus, np.log10(line_data_file_virus_0), marker="o",
-                                                                   color=colors[0],
-                                                                   markeredgecolor="black",
-                                                                   linestyle=" ",
-                                                                   markersize=markersize,
-                                                                   alpha=alpha)
+                                                                markersize=markersize,
+                                                                markeredgecolor="black",
+                                                                markeredgewidth=0.5,
+                                                                linestyle=" ",
+                                                                color = colors[0],
+                                                                alpha=alpha)
 for line_data_file_virus_05 in data_file_virus_05:
     axs[1].plot(t_file_virus, np.log10(line_data_file_virus_05), marker="o",
-                                                                   color=colors[1],
-                                                                   markeredgecolor="black",
-                                                                   linestyle=" ",
-                                                                   markersize=markersize,
-                                                                   alpha=alpha)
+                                                                markersize=markersize,
+                                                                markeredgecolor="black",
+                                                                markeredgewidth=0.5,
+                                                                linestyle=" ",
+                                                                color = colors[1],
+                                                                alpha=alpha)
 for line_data_file_virus_5 in data_file_virus_5:
     axs[1].plot(t_file_virus, np.log10(line_data_file_virus_5), marker="o",
-                                                                   color=colors[2],
-                                                                   markeredgecolor="black",
-                                                                   linestyle=" ",
-                                                                   markersize=markersize,
-                                                                   alpha=alpha)
+                                                                markersize=markersize,
+                                                                markeredgecolor="black",
+                                                                markeredgewidth=0.5,
+                                                                linestyle=" ",
+                                                                color = colors[2],
+                                                                alpha=alpha)
 
 point_grey = plt.Line2D([0], [0],
-                    marker='o',
-                    markersize=markersize,
-                    markeredgecolor='black',
-                    markerfacecolor=colors[0],
-                    linestyle='',
-                    alpha=alpha)
+                        marker="o",
+                        markersize=markersize,
+                        markeredgecolor="black",
+                        markeredgewidth=0.5,
+                        linestyle=" ",
+                        color=colors[0],
+                        alpha=alpha)
 point_blue = plt.Line2D([0], [0],
-                    marker='o',
-                    markersize=markersize,
-                    markeredgecolor='black',
-                    markerfacecolor=colors[1],
-                    linestyle='',
-                    alpha=alpha)
+                        marker="o",
+                        markersize=markersize,
+                        markeredgecolor="black",
+                        markeredgewidth=0.5,
+                        linestyle=" ",
+                        color=colors[1],
+                        alpha=alpha)
 point_cyan = plt.Line2D([0], [0],
-                    marker='o',
-                    markersize=markersize,
-                    markeredgecolor='black',
-                    markerfacecolor=colors[2],
-                    linestyle='',
-                    alpha=alpha)
+                        marker="o",
+                        markersize=markersize,
+                        markeredgecolor="black",
+                        markeredgewidth=0.5,
+                        linestyle=" ",
+                        color=colors[2],
+                        alpha=alpha)
 axs[1].legend([point_grey, point_blue, point_cyan],
               [r'control', r'PB28 0.5 \textmu M', r'PB28 5 \textmu M'],
               loc="lower right")
 
 fig.tight_layout()
-plt.savefig("../LaTeX/figures/data.pdf",
-            format="pdf", transparent=True)
-plt.savefig("figures/data.tiff", format="tiff")
+plt.savefig("figures/Fig1.pdf", format="pdf", transparent=True)
+plt.savefig("figures/Fig1.tiff", format="tiff")
 plt.show()

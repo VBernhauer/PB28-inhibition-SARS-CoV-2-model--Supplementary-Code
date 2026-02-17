@@ -1,18 +1,13 @@
 #! /usr/bin/env python
 from __future__ import division
 from pickle import load
-
-import random
-
 from scipy.integrate import odeint
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import os
-# import matplotlib
-# matplotlib.rcParams['text.usetex'] = True
-# matplotlib.rcParams['font.family'] = 'Helvetica'
+
 
 from matplotlib import rc
 rc('font',**{'family':'serif','serif':['Times']})
@@ -155,7 +150,6 @@ maxlik_solution_96well = model_96well_tt(chains[idx_max_likelihood,:])
 solutions_6well = []
 solutions_96well = []
 for i in range(int(np.size(chains)/dim)):
-    # if i % 10 == 0:
     solutions_6well.append(model_6well_tt(chains[i,:]))
     solutions_96well.append(model_96well_tt(chains[i,:]))
 solutions_6well = np.array(solutions_6well)
@@ -193,12 +187,6 @@ for c_idx, infection in enumerate(solutions_6well_out):
         solution_max_6well_t = np.percentile(solution_6well_infection[:,idx], 97.5)
         solution_max_6well[c_idx].append(solution_max_6well_t)
 
-        # solution_min_6well_t = np.min(solution_6well_infection[:,idx])
-        # solution_min_6well[c_idx].append(solution_min_6well_t)
-        #
-        # solution_max_6well_t = np.max(solution_6well_infection[:,idx])
-        # solution_max_6well[c_idx].append(solution_max_6well_t)
-
 for c_idx, infection in enumerate(solutions_96well_out):
     solution_96well_infection = solutions_96well_out[c_idx]
     for idx, t in enumerate(tt):
@@ -209,17 +197,11 @@ for c_idx, infection in enumerate(solutions_96well_out):
         solution_max_96well_t = np.percentile(solution_96well_infection[:,idx], 97.5)
         solution_max_96well[c_idx].append(solution_max_96well_t)
 
-        # solution_min_96well_t = np.min(solution_96well_infection[:,idx])
-        # solution_min_96well[c_idx].append(solution_min_96well_t)
-        #
-        # solution_max_96well_t = np.max(solution_96well_infection[:,idx])
-        # solution_max_96well[c_idx].append(solution_max_96well_t)
-
 
 ### plot ###
 fontsize = 12
-markersize = 6
-alpha = 0.35
+markersize = 8
+alpha = 0.75
 alpha_data = 1
 labels = [r"(A) PB28 0.01 \textmu M, end-point infection",
           r"(B) PB28 0.1 \textmu M, end-point infection",
@@ -231,8 +213,8 @@ labels = [r"(A) PB28 0.01 \textmu M, end-point infection",
           r"(H) PB28 0.5 \textmu M, time-resolved infection",
           r"(I) PB28 5 \textmu M, time-resolved infection"]
 
-colors = ["blueviolet",
-          "blue",
+colors = ["orchid",
+          "dodgerblue",
           "cyan"]
 
 fig, axs = plt.subplots(3, 3, figsize=(11.5, 8.5))
@@ -256,51 +238,28 @@ for ii in range(3):
         axs[ii,jj].set_ylabel(r"Viral load (log$_{10}$ PFU$_\mathrm{e}$/mL)", fontsize=fontsize)
 
         if kk <= 5:
-            # axs[ii, jj].fill_between(tt, solution_min_96well[kk], solution_max_96well[kk], facecolor="grey",#colors[kk],
-            #                          edgecolor="grey",#colors[kk],
-            #                          alpha=alpha)
+            axs[ii, jj].fill_between(tt, solution_min_96well[kk], solution_max_96well[kk], facecolor="lightgreen", alpha=alpha)
             axs[ii,jj].plot(tt, maxlik_solution_96well[kk],
-                     color="green",#colors[kk],
+                     color="black",
                      linestyle="-",
                      linewidth=1,
                      alpha=1)
-            axs[ii,jj].plot(tt, solution_min_96well[kk],
-                     color="green",#colors[kk],
-                     linestyle="--",
-                     linewidth=1,
-                     alpha=0.5)
-            axs[ii,jj].plot(tt, solution_max_96well[kk],
-                     color="green",#colors[kk],
-                     linestyle="--",
-                     linewidth=1,
-                     alpha=0.5)
             for line_data in data_virus_pb28.T[kk]:
                 axs[ii,jj].plot(t_file_virus_pb28, np.log10(line_data), marker="o",
-                                                                       color="green",#colors[kk],
+                                                                       color="lightgreen",
                                                                        markeredgecolor="black",
                                                                        linestyle=" ",
                                                                        markersize=markersize,
                                                                        alpha=alpha_data)
         if kk > 5:
             mm = kk - 6
-            # axs[ii,jj].fill_between(tt, solution_min_6well[mm], solution_max_6well[mm], facecolor="grey",#colors[kk],
-            #                                                                             edgecolor="grey",#colors[kk],
-            #                                                                             alpha=alpha)
+            axs[ii,jj].fill_between(tt, solution_min_6well[mm], solution_max_6well[mm], facecolor=colors[mm],
+                                                                                        alpha=alpha)
             axs[ii,jj].plot(tt, maxlik_solution_6well[mm],
-                     color=colors[mm],
+                     color="black",
                      linestyle="-",
                      linewidth=1,
                      alpha=1)
-            axs[ii,jj].plot(tt, solution_min_6well[mm],
-                     color=colors[mm],
-                     linestyle="--",
-                     linewidth=1,
-                     alpha=0.5)
-            axs[ii,jj].plot(tt, solution_max_6well[mm],
-                     color=colors[mm],
-                     linestyle="--",
-                     linewidth=1,
-                     alpha=0.5)
             for line_data in data_virus[mm]:
                 axs[ii,jj].plot(t_file_virus, np.log10(line_data), marker="o",
                                                                        color=colors[mm],
@@ -309,7 +268,6 @@ for ii in range(3):
                                                                        markersize=markersize,
                                                                        alpha=alpha_data)
 fig.tight_layout()
-plt.savefig("../LaTeX/figures/kinetics.pdf",
-            format="pdf", transparent=True)
-plt.savefig("./figures/kinetics.tiff", format="tiff")
+plt.savefig("./figures/Fig3.pdf", format="pdf", transparent=True)
+plt.savefig("./figures/Fig3.tiff", format="tiff")
 plt.show()

@@ -1,10 +1,8 @@
 #! /usr/bin/env python
 from __future__ import division
 from pickle import dump
-from scipy.integrate import odeint
 from scipy.stats import pearsonr
 from matplotlib.ticker import FormatStrFormatter
-from scipy.optimize import least_squares
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -69,49 +67,57 @@ def residuals_cells(parameters, c, data):
     return res
 
 ########################################################################################################################
-fraction_max_lower  = 0
-fraction_max_upper  = np.inf
-CC_50_lower   = 0
-CC_50_upper   = np.inf
-N_lower       = 0
-N_upper       = np.inf
+# fraction_max_lower  = 0
+# fraction_max_upper  = np.inf
+# CC_50_lower   = 0
+# CC_50_upper   = np.inf
+# N_lower       = 0
+# N_upper       = np.inf
+#
+# bound_lower = [fraction_max_lower,
+#                CC_50_lower,
+#                N_lower]
+# bound_upper = [fraction_max_upper,
+#                CC_50_upper,
+#                N_upper]
+#
+# fraction_max    = np.log10(100)
+# CC50            = np.log10(4e+0)
+# N               = np.log10(1e+1)
+#
+# parameters = [fraction_max, CC50, N ]
+#
+# chains_folder = "./chains_CC50"
+# if not os.path.exists(chains_folder):
+#     os.makedirs(chains_folder)
+#
+# #### MCMC growth ######################################################################################################
+# pos = 10 ** (parameters + 1e-4 * np.random.randn(2 * len(parameters), len(parameters)))
+# nwalkers, ndim = np.shape(pos)
+#
+# sampler = emcee.EnsembleSampler(nwalkers, ndim, logprob)
+# Nsamples = 20000  # number of final posterior samples
+#
+# print("Processing...")
+# sampler.run_mcmc(pos, Nsamples, progress=True)
+#
+# chains = sampler.get_chain(discard=int(Nsamples/2), thin=10, flat=True)
+# log_prob = sampler.get_log_prob(discard=int(Nsamples/2), thin=10, flat=True)
+#
+# with open('chains_CC50/logprob.obj', 'wb') as a:
+#     dump(log_prob, a)
+# with open('chains_CC50/chains.obj', 'wb') as b:
+#     dump(chains, b)
 
-bound_lower = [fraction_max_lower,
-               CC_50_lower,
-               N_lower]
-bound_upper = [fraction_max_upper,
-               CC_50_upper,
-               N_upper]
+cc      = np.concatenate([np.linspace(0.01, 0.99, 99), np.linspace(1, 10, 91)])
+ndim    = 3
 
-fraction_max    = np.log10(100)
-CC50            = np.log10(4e+0)
-N               = np.log10(1e+1)
+from pickle import load
+with open('chains_CC50/logprob.obj', 'rb') as a:
+    log_prob = load(a)
 
-parameters = [fraction_max, CC50, N ]
-
-chains_folder = "./chains_CC50"
-if not os.path.exists(chains_folder):
-    os.makedirs(chains_folder)
-
-#### MCMC growth ######################################################################################################
-pos = 10 ** (parameters + 1e-4 * np.random.randn(2 * len(parameters), len(parameters)))
-nwalkers, ndim = np.shape(pos)
-
-sampler = emcee.EnsembleSampler(nwalkers, ndim, logprob)
-Nsamples = 20000  # number of final posterior samples
-
-print("Processing...")
-sampler.run_mcmc(pos, Nsamples, progress=True)
-
-chains = sampler.get_chain(discard=int(Nsamples/2), thin=10, flat=True)
-log_prob = sampler.get_log_prob(discard=int(Nsamples/2), thin=10, flat=True)
-
-with open('chains_CC50/logprob.obj', 'wb') as a:
-    dump(log_prob, a)
-with open('chains_CC50/chains.obj', 'wb') as b:
-    dump(chains, b)
-
-cc = np.concatenate([np.linspace(0.01, 0.99, 99), np.linspace(1, 10, 91)])
+with open('chains_CC50/chains.obj', 'rb') as b:
+    chains = load(b)
 
 ### plot cytotoxicity - growth #########################################################################################
 ### index of the maximum likelihood value ##############################################################################
@@ -132,19 +138,16 @@ for idx, concentration in enumerate(cc):
     solution_min.append(solution_min_idx)
     solution_max_idx = np.percentile(solution[:,idx], 97.5)
     solution_max.append(solution_max_idx)
-    # solution_min_idx = np.min(solution[:,idx])
-    # solution_min.append(solution_min_idx)
-    # solution_max_idx = np.max(solution[:,idx])
-    # solution_max.append(solution_max_idx)
 
 
 fig = plt.figure(figsize=(5, 4))
 
 markersize = 8
 capsize = 8
-alpha = 1
-linewidth = 1.5
-elinewidth = 1.5
+alpha = 0.5
+alpha_data = 1
+linewidth = 1
+elinewidth = 1
 fontsize = 12
 
 frame = fig.gca()
@@ -155,37 +158,25 @@ frame.axes.yaxis.set_ticklabels(["70", "80", "90", "100", "110", "120"], fontsiz
 plt.ylim(70, 120)
 plt.xlabel(r"PB28 concentration (\textmu M)", fontsize=fontsize)
 plt.ylabel(r"A549-ACE2 cell viability relative to control (\%)", fontsize=fontsize)
-# plt.fill_between(np.log10(cc), solution_min, solution_max, facecolor="red", edgecolor="red", alpha=0.2)
-plt.plot(np.log10(cc), maxlik_solution, color="red",
-                                         linestyle="-",
-                                         linewidth=1,
-                                         alpha=1)
-plt.plot(np.log10(cc), solution_min, color="red",
-                                         linestyle="--",
-                                         linewidth=1,
-                                         alpha=0.5)
-plt.plot(np.log10(cc), solution_max, color="red",
-                                         linestyle="--",
-                                         linewidth=1,
-                                         alpha=0.5)
+plt.fill_between(np.log10(cc), solution_min, solution_max, facecolor="salmon", alpha=alpha)
+plt.plot(np.log10(cc), maxlik_solution, color="black",
+                                             linestyle="-",
+                                             linewidth=linewidth,
+                                             alpha=1)
 for line in data:
     plt.plot(np.log10(C), line, marker="o",
-                                        color="red",
-                                        markeredgecolor="black",
-                                        linestyle=" ",
                                         markersize=markersize,
-                                        alpha=alpha)
-plt.text(-2, 73, "CC$_{50}$ = " + str(round(maxlik_parameters[1], 3)) + r" \textmu M",
+                                        markeredgecolor="black",
+                                        markeredgewidth=0.5,
+                                        linestyle=" ",
+                                        color="salmon",
+                                        alpha=alpha_data)
+plt.text(-2, 73, "CC$_{50}$ = " + str(round(maxlik_parameters[1], 1)) + r" \textmu M",
                fontsize=fontsize,
-               color='red')#,
-               # weight='bold')
-# plt.text(-2, 115, "(A)",
-#                fontsize=14,
-#                color='black')
+               color='black')
 fig.tight_layout()
-plt.savefig("../LaTeX/figures/cytotoxicity.pdf", format="pdf", transparent=True)
+plt.savefig("./figures/cytotoxicity.pdf", format="pdf", transparent=True)
 plt.savefig("./figures/cytotoxicity.tiff", format="tiff")
-# plt.show()
 
 ### plot corner - growth ################################################################################################
 ### mean, median, 95% credible regions ###
@@ -224,7 +215,7 @@ plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
-labels = r"log$_{10}$ $A_\mathrm{max}$", r"log$_{10}$ $\mathrm{CC}_{50}$", r"log$_{10}$ $N_\mathrm{A}$"
+labels = r"log$_{10}$ $A_\mathrm{max}$", r"log$_{10}$ ${CC}_{50}$", r"log$_{10}$ $N_\mathrm{A}$"
 
 fig, axs = plt.subplots(ndim, ndim)
 fig.subplots_adjust(hspace=0.2, wspace=0.2)
@@ -235,7 +226,7 @@ for i in range(ndim):
         elif i == j:
             sns.kdeplot(data=np.log10(chains[:, i]),
                         ax=axs[i, j],
-                        color="red",
+                        color="gray",
                         fill=True)
             if i < ndim-1:
                 axs[i, j].set_xticks([])
@@ -245,27 +236,30 @@ for i in range(ndim):
             axs[i, j].set_ylabel('')
             axs[i, j].set_yticklabels([])
         else:
-            corrplt = sns.kdeplot(data=df, x=df[j], y=df[i], ax=axs[i, j], color="red", linewidths=0.5)
+            corrplt = sns.kdeplot(data=df, x=df[j], y=df[i], ax=axs[i, j], color="gray", linewidths=0.5)
             if i != ndim - 1:
                 corrplt.set(ylabel=None)
             if i != ndim - 1:
                 corrplt.set(xlabel=None)
             if j  != 0:
                 corrplt.set(ylabel=None)
-            axs[i, j].scatter(np.log10(maxlik_parameters[j]), np.log10(maxlik_parameters[i]),
-                              s=24,
-                              color="black",
-                              alpha=1)
             axs[i, j].axvline(x = np.log10(maxlik_parameters[j]),
-                              color="black",
+                              color="red",
                               linestyle='-',
                               linewidth=0.5,
                               alpha=1)
             axs[i, j].axhline(y = np.log10(maxlik_parameters[i]),
-                              color="black",
+                              color="red",
                               linestyle='-',
                               linewidth=0.5,
                               alpha=1)
+            axs[i, j].scatter(np.log10(maxlik_parameters[j]), np.log10(maxlik_parameters[i]),
+                              s=32,
+                              color="red",
+                              alpha=1,
+                              edgecolor = "red",
+                              linewidths = 0.5,
+                            )
             correl, _ = pearsonr(np.log10(chains[:,j]), np.log10(chains[:,i]))
             axs[i,j].text(0.75, 0.85, round(correl, 2),
                           fontsize=MEDIUM_SIZE,
@@ -284,12 +278,7 @@ for i in range(ndim):
     else:
         axs[i, 0].set_ylabel(labels[i], rotation=90, labelpad=5)
 
-# print(axs[0,0].get_position())
-# axs[0,0].text(0.45, 5, "(B)",
-#                fontsize=BIGG_SIZE,
-#                color='black')
 fig.tight_layout()
-
-plt.savefig("../LaTeX/figures/corner_cytotoxicity.pdf", format="pdf", transparent=True)
-plt.savefig("./figures/corner_cytotoxicity.tiff", format="tiff")
+plt.savefig("./figures/FigS1.pdf", format="pdf", transparent=True)
+plt.savefig("./figures/FigS1.tiff", format="tiff")
 plt.show()
