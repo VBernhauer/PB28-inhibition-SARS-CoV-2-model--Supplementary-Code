@@ -171,7 +171,7 @@ for line in data:
                                         linestyle=" ",
                                         color="salmon",
                                         alpha=alpha_data)
-plt.text(-2, 73, "CC$_{50}$ = " + str(round(maxlik_parameters[1], 1)) + r" \textmu M",
+plt.text(-2, 73, "CC$_{50}$ = " + str(round(maxlik_parameters[1], 3)) + r" \textmu M",
                fontsize=fontsize,
                color='black')
 fig.tight_layout()
