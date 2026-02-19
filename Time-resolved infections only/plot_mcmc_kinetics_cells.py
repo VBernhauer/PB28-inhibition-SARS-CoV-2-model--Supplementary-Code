@@ -274,13 +274,11 @@ for ii in range(3):
 
 mp = [[], [], []]
 for ii in range(len(population)):
-    mp[ii] = mpatches.Patch(color=colors[ii], alpha=alpha, linewidth=0)
-for ii in range(3):
-    for jj in range(3):
-        axs[ii, jj].legend(mp, population, loc='center left',
-                           fontsize=8)
-
+    mp[ii] = mpatches.Patch(color=colors[ii], alpha=1, linewidth=0)
+fig.legend(mp, population, loc='upper center', ncol=3, fontsize=fontsize)
 fig.tight_layout()
+fig.subplots_adjust(top=0.95)
+
 plt.savefig("./figures/FigS13.tiff", format="tiff")
 plt.savefig("./figures/FigS13.pdf", format="pdf", transparent=True)
 plt.show()
